@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: maximdb
+      POSTGRES_PASSWORD: polapamax
+      POSTGRES_DB: testforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://maximdb:polapamax@db:5432/testforge
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "3001:3000"
+
+volumes:
+  pgdata:
