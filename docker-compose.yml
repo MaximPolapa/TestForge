@@ -9,8 +9,11 @@ services:
       POSTGRES_DB: testforge
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./databases/all.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5433:5432"
+    networks:
+      - site_network
 
   backend:
     build:
@@ -22,6 +25,8 @@ services:
       - "8001:8000"
     environment:
       - DATABASE_URL=postgresql://maximdb:polapamax@db:5432/testforge
+    networks:
+      - site_network
 
   frontend:
     build:
@@ -31,6 +36,12 @@ services:
       - backend
     ports:
       - "3001:3000"
+    networks:
+      - site_network
 
 volumes:
   pgdata:
+
+networks:
+  site_network:
+    driver: bridge
