@@ -25,7 +25,7 @@ const LoginForm = () => {
   
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify({ username })); // 👈 Зберігаємо ім’я користувача
-      navigate('/');
+      navigate('/my-projects');
     } catch (error) {
       console.error(error);
       setMessage('❌ Невірний email або пароль');

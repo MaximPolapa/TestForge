@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes_users import router as user_router
 from app.api import routes_auth
 from app.core.database import Base, engine
+from app.api import routes_repository
+
 
 # 1. Ініціалізація FastAPI
 app = FastAPI(
@@ -25,3 +27,4 @@ app.add_middleware(
 # 4. Лише після цього — додавай роутери
 app.include_router(user_router, prefix="/users", tags=["Users"])
 app.include_router(routes_auth.router, tags=["Auth"])
+app.include_router(routes_repository.router)
