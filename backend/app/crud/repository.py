@@ -11,3 +11,7 @@ def create_repository(db: Session, repo: RepositoryCreate, user_id: int):
 
 def get_repositories_by_user(db: Session, user_id: int):
     return db.query(Repository).filter(Repository.user_id == user_id).all()
+
+def get_repository_by_id(db: Session, repo_id: int):
+    return db.query(Repository).filter(Repository.id == repo_id).first()
+

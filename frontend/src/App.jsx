@@ -7,6 +7,7 @@ import MyProjects from './pages/MyProjects';
 import SettingsPage from './pages/SettingsPage'; 
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+import RepositoryDetails from './pages/RepositoryDetails';
 import React from 'react';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/my-projects" element={<PrivateRoute><MyProjects /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+        <Route path="/repo/:id" element={<PrivateRoute><RepositoryDetails /></PrivateRoute>} />
       </Routes>
     </Router>
   );
