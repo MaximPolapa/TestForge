@@ -21,10 +21,15 @@ services:
       dockerfile: backend/Dockerfile
     depends_on:
       - db
+      - unitgenerator  # 👈 щоб backend не запустився раніше ніж генератор
     ports:
       - "8001:8000"
     environment:
       - DATABASE_URL=postgresql://maximdb:polapamax@db:5432/testforge
+      - UNIT_GEN_URL=http://unitgenerator:5000/generate  # 👈 важливо для виклику з бекенду
+    volumes:
+      - ./shared:/shared  # 👈 для обміну файлами
+      - shared-repo:/app/tmp_repo_1
     networks:
       - site_network
 
@@ -39,8 +44,23 @@ services:
     networks:
       - site_network
 
+  unitgenerator:
+    build:
+      context: ./unit-tests-service
+    ports:
+      - "5001:5000"
+    env_file:
+      - ./unit-tests-service/key.env
+    volumes:
+      - ./shared:/shared  # ✅ змінив /app -> /shared
+      - shared-repo:/app/tmp_repo_1
+    networks:
+      - site_network
+
+
 volumes:
   pgdata:
+  shared-repo:
 
 networks:
   site_network:

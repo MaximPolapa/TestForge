@@ -10,3 +10,4 @@ pydantic-settings
 python-jose
 python-multipart
 bcrypt==3.2.0 
+requests 

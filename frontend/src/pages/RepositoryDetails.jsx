@@ -7,6 +7,8 @@ const RepositoryDetails = () => {
   const [repo, setRepo] = useState(null);
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [generationResult, setGenerationResult] = useState('');
 
   useEffect(() => {
     const fetchRepoDetails = async () => {
@@ -17,11 +19,9 @@ const RepositoryDetails = () => {
         });
         setRepo(res.data);
 
-        // Отримуємо ім’я юзера і репо з GitHub URL
         const match = res.data.github_url.match(/github\.com\/([^/]+)\/([^/]+)/);
         if (match) {
           const [, owner, repoName] = match;
-
           const ghRes = await fetch(`https://api.github.com/repos/${owner}/${repoName}/contents`);
           const ghData = await ghRes.json();
           setFiles(ghData);
@@ -34,6 +34,29 @@ const RepositoryDetails = () => {
 
     fetchRepoDetails();
   }, [id]);
+
+  const generateTests = async () => {
+    setGenerating(true);
+    setGenerationResult('');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/repositories/${id}/generate-tests`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setGenerationResult(response.data.message || '✅ Тести згенеровано успішно!');
+    } catch (err) {
+      console.error(err);
+      setGenerationResult("❌ Виникла помилка при генерації тестів.");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   if (error) return <div className="p-6 text-red-400">{error}</div>;
   if (!repo) return <div className="p-6 text-white">Завантаження...</div>;
@@ -48,7 +71,7 @@ const RepositoryDetails = () => {
       </p>
 
       <h2 className="text-2xl font-semibold mb-2">📁 Файли:</h2>
-      <ul className="list-disc list-inside space-y-1">
+      <ul className="list-disc list-inside space-y-1 mb-6">
         {files.length > 0 ? files.map(file => (
           <li key={file.sha}>
             {file.type === 'file' ? (
@@ -61,6 +84,18 @@ const RepositoryDetails = () => {
           </li>
         )) : <p>Порожньо або не вдалося завантажити вміст.</p>}
       </ul>
+
+      <button
+        onClick={generateTests}
+        disabled={generating}
+        className={`px-6 py-2 font-bold rounded-xl transition ${
+          generating ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
+        }`}
+      >
+        {generating ? '⏳ Генерація...' : '🚀 Згенерувати Unit-тести'}
+      </button>
+
+      {generationResult && <p className="mt-4 text-green-400">{generationResult}</p>}
     </div>
   );
 };
