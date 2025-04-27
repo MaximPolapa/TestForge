@@ -9,6 +9,10 @@ const RepositoryDetails = () => {
   const [error, setError] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generationResult, setGenerationResult] = useState('');
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [githubUsername, setGithubUsername] = useState('');
+  const [githubToken, setGithubToken] = useState('');
+  const [branchName, setBranchName] = useState('main');
 
   useEffect(() => {
     const fetchRepoDetails = async () => {
@@ -35,26 +39,35 @@ const RepositoryDetails = () => {
     fetchRepoDetails();
   }, [id]);
 
-  const generateTests = async () => {
+  const generateTests = () => {
+    setShowAuthForm(true);
+  };
+
+  const submitGenerateTests = async () => {
     setGenerating(true);
     setGenerationResult('');
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/repositories/${id}/generate-tests`,
-        {},
+        {
+          github_username: githubUsername,
+          github_token: githubToken,
+          branch_name: branchName
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
-      setGenerationResult(response.data.message || '✅ Тести згенеровано успішно!');
+      setGenerationResult(response.data.message || '✅ Тести згенеровано і запушено успішно!');
     } catch (err) {
       console.error(err);
-      setGenerationResult("❌ Виникла помилка при генерації тестів.");
+      setGenerationResult("❌ Виникла помилка при генерації тестів або пуші.");
     } finally {
       setGenerating(false);
+      setShowAuthForm(false);
     }
   };
 
@@ -85,15 +98,55 @@ const RepositoryDetails = () => {
         )) : <p>Порожньо або не вдалося завантажити вміст.</p>}
       </ul>
 
-      <button
-        onClick={generateTests}
-        disabled={generating}
-        className={`px-6 py-2 font-bold rounded-xl transition ${
-          generating ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {generating ? '⏳ Генерація...' : '🚀 Згенерувати Unit-тести'}
-      </button>
+      {!showAuthForm ? (
+        <button
+          onClick={generateTests}
+          disabled={generating}
+          className={`px-6 py-2 font-bold rounded-xl transition ${
+            generating ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {generating ? '⏳ Генерація...' : '🚀 Згенерувати Unit-тести'}
+        </button>
+      ) : (
+        <div className="bg-gray-800 p-6 rounded-xl shadow-xl mt-6 space-y-4">
+          <h2 className="text-xl font-bold mb-2">🔐 GitHub Авторизація</h2>
+          <input
+            type="text"
+            placeholder="GitHub Username"
+            value={githubUsername}
+            onChange={(e) => setGithubUsername(e.target.value)}
+            className="w-full p-2 rounded-lg text-black"
+          />
+          <input
+            type="password"
+            placeholder="GitHub Token"
+            value={githubToken}
+            onChange={(e) => setGithubToken(e.target.value)}
+            className="w-full p-2 rounded-lg text-black"
+          />
+          <input
+            type="text"
+            placeholder="Branch Name (default: main)"
+            value={branchName}
+            onChange={(e) => setBranchName(e.target.value)}
+            className="w-full p-2 rounded-lg text-black"
+          />
+          <button
+            onClick={submitGenerateTests}
+            disabled={generating}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-xl font-bold"
+          >
+            {generating ? '⏳ Генерація і пуш...' : '✅ Підтвердити і згенерувати'}
+          </button>
+          <button
+            onClick={() => setShowAuthForm(false)}
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-xl font-bold"
+          >
+            ❌ Скасувати
+          </button>
+        </div>
+      )}
 
       {generationResult && <p className="mt-4 text-green-400">{generationResult}</p>}
     </div>
