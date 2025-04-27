@@ -54,7 +54,7 @@ def generate_tests(
 
     # Коміт і пуш
     os.system(f"cd {clone_path} && git add .")
-    commit_result = os.system(f'cd {clone_path} && git commit -m "Add generated unit tests 🧪" || echo "no changes"')
+    commit_result = os.system(f'cd {clone_path} && git commit -m "Add generated unit tests by GenAI Unit Test Generator" || echo "no changes"')
 
     # Якщо нема чого комітити, просто ігноримо
     push_result = os.system(f"cd {clone_path} && git push origin {branch_name}")

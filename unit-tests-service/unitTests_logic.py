@@ -21,7 +21,7 @@ def read_files(file_list):
     return {f: open(f, encoding="utf-8").read() for f in file_list if os.path.exists(f)}
 
 def generate_unit_tests(file_contents):
-    prompt = "Analyze the following files and generate unit tests for them using pytest:\n"
+    prompt = "Generate only the pure Python code of unit tests using pytest for the following files. Do not write any explanations, comments, or text before or after the code. Output only the test code:\n"
     for filename, content in file_contents.items():
         prompt += f"\n### FILE: {filename}\n{content}\n"
     prompt += "\nGenerate only valid Python code."
